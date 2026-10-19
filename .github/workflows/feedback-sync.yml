@@ -1,0 +1,38 @@
+name: feedback-sync
+
+# 구글 폼 응답 시트를 읽어 이슈·Discussions로 옮긴다.
+# 규격: ekaya-studio 레포 docs/tracks/platform/2026-10-19-feedback-channel-expansion SPEC §3·§4
+#
+# contents 권한을 주지 않는다 — 같은 레포의 promote-on-publish.yml이 자동 업데이트 포인터를 다룬다.
+# 로그는 public이다: 행 내용·제목·오류 본문은 찍지 않는다(sync.mjs).
+
+on:
+  schedule:
+    - cron: '17 * * * *' # 정각 혼잡을 피해 17분. 시각은 UTC, 지연·누락 가능
+  workflow_dispatch:
+
+permissions:
+  contents: read # checkout만. 쓰기 권한은 주지 않는다
+  issues: write
+  discussions: write
+
+concurrency:
+  group: feedback-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/feedback-sync
+      - name: 변환 단위 테스트
+        run: node --test .github/feedback-sync/transform.test.mjs
+      - name: 시트 → 이슈
+        env:
+          EKAYA_FEEDBACK_SHEETS_SA: ${{ secrets.EKAYA_FEEDBACK_SHEETS_SA }}
+          EKAYA_FEEDBACK_SHEET_ID: ${{ vars.EKAYA_FEEDBACK_SHEET_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/feedback-sync/sync.mjs
