@@ -26,3 +26,12 @@ Ekaya Studio 데스크톱 앱 다운로드 전용 레포입니다. 소스코드�
 
 - 버그 제보와 기능 제안: [Issues](../../issues/new/choose)
 - 사용법 질문, 아이디어, 사용례: [Discussions](../../discussions)
+
+### 구글 폼으로 보낸 제보 (GitHub 계정이 없을 때)
+
+앱의 「계정 없이 보내기」는 구글 폼을 엽니다. 폼으로 받은 제보는 매시간 이 저장소의 이슈(질문은 Discussions Q&A)로 옮겨집니다.
+
+- 연락처(이메일)는 **옮기지 않습니다.** 답장 용도로만 쓰고 90일 뒤 삭제합니다.
+- 본문의 사용자 경로·IP·긴 토큰은 가려서 올립니다.
+- 본문에 이메일·전화번호가 있거나 스팸으로 보이는 제보는 자동으로 올리지 않고 보류한 뒤 담당자가 확인합니다.
+- 옮기는 스크립트: [`.github/feedback-sync/`](.github/feedback-sync), 워크플로: [`feedback-sync.yml`](.github/workflows/feedback-sync.yml).
