@@ -14,6 +14,15 @@ Ekaya Studio 데스크톱 앱 다운로드 전용 레포입니다. 소스코드�
 마크다운 편집기, Git 익스플로러, 데이터 모델러(ERD), DB 클라이언트, 이미지 스튜디오, 파일 비교,
 터미널/RDP, 칸반, 메신저 등을 한 창에서 전환하며 씁니다.
 
+### Windows — winget
+
+```
+winget install EkayaLabs.EkayaStudio
+```
+
+모든 앱을 미리 담은 묶음 설치본(`…_x64-all-setup.exe`)을 설치합니다. winget 등록은 [winget-pkgs#486354](https://github.com/microsoft/winget-pkgs/pull/486354) 심사가 끝난 뒤부터 동작합니다.
+새 판을 게시하면 [`winget-submit.yml`](.github/workflows/winget-submit.yml)이 포인터 승격 뒤 winget-pkgs에 PR을 냅니다(병합은 winget 검토자).
+
 ## 자동 업데이트
 
 설치된 앱은 `devvault-latest` 릴리스를 통해 새 버전을 확인합니다. 버전 이력은

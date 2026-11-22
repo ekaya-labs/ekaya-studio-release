@@ -1,0 +1,57 @@
+name: Submit to winget-pkgs
+
+# 사람이 Draft를 Publish → promote-on-publish.yml이 -latest 포인터를 올린 **뒤에** 이 워크플로가 돈다.
+# 포인터가 가리키는 판의 묶음 설치본(*_x64-all-setup.exe)으로 microsoft/winget-pkgs에 매니페스트 PR을 연다.
+# 병합은 winget-pkgs 검토자가 한다(판 올림은 대개 몇 시간~하루).
+#
+# - Draft 판·이미 winget에 있는 판·열린 PR이 있는 판은 건너뛴다(성공으로 끝남). 그래서 promote가 두 번 돌아도 PR은 하나다.
+# - 손으로 다시 내려면 Actions → 이 워크플로 → Run workflow(판 입력, dry_run으로 매니페스트만 볼 수도 있다).
+# - 시크릿 WINGET_PKGS_TOKEN: ekaya-labs classic PAT, scope public_repo. fork에 커밋하고 winget-pkgs에 PR을 연다.
+# 본체: .github/winget/submit.sh · 템플릿: .github/winget/templates/
+# 설계: ekaya-studio 트랙 docs/tracks/platform/2026-11-22-winget-distribution (SPEC §3)
+on:
+  workflow_run:
+    workflows: ["Promote published release to -latest pointer"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'winget에 낼 판(예: 0.26.0). 비우면 ekaya-studio-latest 포인터의 판'
+        required: false
+        type: string
+        default: ''
+      dry_run:
+        description: '매니페스트만 만들고 PR은 내지 않는다'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winget-submit
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render manifests and open the winget-pkgs PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WINGET_TOKEN: ${{ secrets.WINGET_PKGS_TOKEN }}
+          VERSION: ${{ inputs.version }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          OUT_DIR: ${{ runner.temp }}/winget
+        run: bash .github/winget/submit.sh
+      - name: Keep the rendered manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: winget-manifests
+          path: ${{ runner.temp }}/winget
+          if-no-files-found: ignore
